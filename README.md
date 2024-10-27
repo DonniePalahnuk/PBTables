@@ -59,9 +59,15 @@ This repository is shared under the MIT License. Please feel free to use, modify
 ## Contact
 For questions, feedback, or further information, please contact:
 - **Author**: Donald Palahnuk
-- **Email**: [YourEmail@example.com]
+- **Email**: dp555@pm.me
 
 ## Acknowledgments
 Thanks to the InsightHatch team for their support in creating the whitepaper and reference tables.
+
+## Environment
+This in produced in R Studio - with R Markdown, and embedded Latex
+Version and Environment upon request. 
+Please take a look the *.rmd file(s) for more information on packages employed. 
+
 
 
