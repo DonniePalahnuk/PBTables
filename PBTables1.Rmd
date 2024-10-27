@@ -1,0 +1,373 @@
+---
+title: "Plackett-Burman Tables"
+author: "Donald Palahnuk"
+date: |
+  | \vhCurrentDate
+  | version \vhCurrentVersion
+  |
+  | InsightHatch WhitePaper: fF2 vs PB Tables For (low $n$)
+  | \textbf{IH-fF2 PB Tables-v}\textbf{\vhCurrentVersion}
+  
+output:
+  pdf_document:
+    toc: yes
+    number_sections: yes
+    keep_tex: yes
+    latex_engine: pdflatex
+    fig_caption: yes
+  html_document:
+    toc: yes
+    df_print: paged
+subtitle: \textit{fF2 vs PB Tables, low $n$}
+bibliography: citations.bib
+biblio-style: apalike
+link-citations: yes
+nocite: '@*'
+fontsize: 12pt
+geometry: margin=1in
+linestretch: 1.25
+papersize: a4
+header-includes:
+ - |
+  ```{=latex}
+  \newcommand{\docTitle}{PB Tables}
+  \usepackage{pgfplots}
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+  \usepackage[skins]{tcolorbox}
+  \usepackage{listings}
+  \usepackage{booktabs}
+  \usepackage{listings}
+  \usepackage{setspace}
+  \usepackage{titling}
+  \pgfplotsset{compat=1.18}
+  \usepackage{tikz}
+  \usepackage{tikz-3dplot}
+  \usetikzlibrary{arrows}
+  \usepackage{xcolor}
+  \usepackage{etoolbox}
+  \usepackage{amsmath}
+  \usepackage{caption}
+  \usepackage{enumitem}
+  \usepackage{varwidth}
+  \usepackage{mathrsfs}
+  \usepackage[nochapter, tocentry, owncaptions, tablegrid]{vhistory}
+  \usepackage{tasks}
+  \usepackage{scrlayer-scrpage}
+  \numberwithin{equation}{section}
+  \usepackage{lastpage}
+  \captionsetup[figure]{font=small,labelfont=small}
+  \usepackage{amsthm}
+  \theoremstyle{plain}
+  \newtheorem{theorem}{Theorem}
+  \theoremstyle{definition}
+  \newtheorem{defn}{Definition}
+  \newtheorem{xmpl}{Example}
+  \theoremstyle{remark}
+  \newtheorem{remark}{Remark}
+  \newtheorem{algorithm}{Algorithm} 
+  \newtheoremstyle{note}    % style name
+  {2ex}                     % above space
+  {2ex}                     % below space
+  {}                        % body font
+  {}                        % indent amount
+  {\scshape}                % head font
+  {.}                       % post head punctuation
+  {\newline}                % post head punctuation
+  {}                        % head spec
+  \theoremstyle{note}
+  \newtheorem{scnote}{Note}  
+
+  \pretitle{%
+  \begin{flushleft} \LARGE
+  \includegraphics[width=2cm,height=2cm]{IH2.jpg}
+  \end{flushleft}
+  \begin{flushright} \LARGE
+  }
+  
+  \posttitle{\end{flushright}}
+  \preauthor{\begin{flushright}}
+  \postauthor{\end{flushright}}
+  \predate{\begin{flushright}}
+  \postdate{\end{flushright}}
+  
+  \ohead[]{IH - AppliedMath WhitePaper}
+  \ifoot{\hsize=350pt \docTitle\ -- Version \vhCurrentVersion}
+  \ofoot{\thepage~/~\pageref{LastPage}}
+  \cfoot[]{}
+  ``` 
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.pos = 'h')
+```
+
+<!-- Can Add listings if needed here- of the code listings and fiugures if indexed. -->
+<!-- \listoffigures -->
+<!-- \lstlistoflistings -->
+
+\
+\begin{versionhistory}
+  \vhEntry{0.0}{2023.10.10}{DP}{created!}
+  \vhEntry{0.1}{2023.10.10}{DP}{compared fF2 vs PB calls, added kable tables}
+  \vhEntry{0.2}{2023.10.11}{DP}{add resolution, and some math}
+  \vhEntry{1.0}{2024.10.27}{DP}{update for github issue}
+\end{versionhistory}
+
+\newpage
+
+# Fractional Factorial and Plackett-Burman DOE 
+
+Design of Experiments (DOE) is a methodological framework for systemically planning experiments, collecting data, and analyzing results. 2 Level Fractional Factorial (fF2) and Plackett-Burman (PB) designs are two common techniques within DOE that aim to reduce the number of experiments you need to run when investigating multiple factors.
+
+## Difference between Fractional Factorial and Plackett-Burman Design
+
+### Fractional Factorial (fF2) 2 Level Design
+
+In a full factorial (FF) design, you study all possible combinations of the factors. However, this can become impractical with a large number of factors. In a fractional factorial design, only a "fraction" of the full set of experiments is carried out. The fraction is chosen carefully so that certain effects (main effects or interactions) can still be estimated. Note in this write-up we use the conventions: $n = 2^{(f-r)}$, where $f$=factors, $r$=reductions).
+
+Variable Resolution: 
+Fractional factorial designs can be of various resolutions (III, IV, V, etc.), depending on how you fractionate the full factorial design.
+
+Resolution III: 
+Main effects are confounded with two-factor interactions but not with each other.
+
+Resolution IV: 
+Main effects are clear of all two-factor interactions. Two-factor interactions are confounded with each other but not with main effects.
+
+Resolution V and above: 
+Higher resolutions allow you to separate higher-order interactions from lower-order effects.
+
+### Plackett-Burman Design
+
+The Plackett-Burman design is another approach to reducing the number of experimental runs. It's commonly used for screening experiments where you have many factors and you want to identify which ones have significant effects on the outcome. These designs are specialized for estimating main effects and **assume that interaction effects are negligible.**
+
+Resolution III: 
+Plackett-Burman designs are generally resolution III designs. This means that main effects are confounded with two-factor interactions but not with each other. In other words, you cannot distinguish between a main effect and a two-factor interaction that it is confounded with. However, main effects are clear of each other.
+
+## _Pros_ and _Cons_
+
+### Fractional Factorial Design
+
+_Pros:_
+More flexible in terms of defining the "fraction" of experiments.
+Allows for the estimation of interaction effects.
+Can be optimal or near-optimal for a given effect size and error.
+
+_Cons:_
+More complex to set up and analyze, especially for higher-order fractions.
+Not efficient for screening a large number of factors, especially when most are not influential.
+
+### Plackett-Burman Design
+
+_Pros:_
+Simple to set up and analyze.
+Efficient for screening a large number of factors to identify the few that are most significant.
+
+_Cons:_
+Assumes that interaction effects are negligible, which may not be true.
+Less flexible in design choices compared to fractional factorial.
+
+In summary, fractional factorial designs offer more flexibility and the ability to study interactions but can be complex and often require more runs than Plackett-Burman designs. Plackett-Burman designs are more straightforward and are generally used for initial screening when you have a large number of factors and you want to identify the most significant ones quickly.
+
+## Discussion of increasing $n$ in the context of fF2 & PB designs. 
+
+The quality of multivariate residuals $(y\hat - y)$ in a Design of Experiments (DOE) largely depends on the underlying structure of the problem, the number and nature of factors, and the presence of interactions and higher-order effects. Here's a breakdown based on the two designs you've mentioned:
+
+Lets discuss a fF2 of $n=12$ vs PB of $n=8$ runs to further understand how these concepts manifest. 
+
+_fF2 with 12 Runs:_
+A 12-run fF2 design will generally allow you to estimate more effects (both main effects and interactions) than an 8-run PB design. This would generally make the model fit better to the actual observed data, potentially yielding better residuals.
+
+_PB with 8 Runs:_
+An 8-run PB design is generally intended for screening a large number of factors to find the few that are most significant. It is usually not efficient for estimating interaction effects, so if your process has significant interactions, a Plackett-Burman design might not capture them well, leading to poorer residuals. However, it allows for a reduced number of experiments which can help to save in experimental execution costs. 
+
+*Key Points to Consider:*
+
+_Interactions:_ 
+If interactions between factors are significant, a fractional factorial design would generally yield better residuals as it allows for the estimation of interactions.
+
+_Number of Factors:_ 
+The Plackett-Burman design is useful for screening a large number of factors. If most factors are not influential, then a Plackett-Burman design may perform reasonably well even with fewer runs.
+
+_Assumptions:_
+Plackett-Burman assumes negligible interactions. If this assumption holds true, then it may give good residuals even with fewer runs.
+
+_Model Complexity:_ 
+Fractional Factorial designs are generally more flexible and can fit more complex models than Plackett-Burman designs.
+
+In summary, if you believe your system is better represented by a model that includes interaction terms, or if you want to estimate these terms, a 12-run fractional factorial design is more likely to give better multivariate residuals. On the other hand, if you are primarily interested in identifying the main effects quickly and cheaply, and are willing to assume that interactions are negligible, then an 8-run Plackett-Burman design could suffice.
+
+\newpage 
+
+# fF2 vs PB in terms of base design $n$ experiments and $f$ factors
+
+Comparison of $n$ between Plackett-Burman and $2_{\mathrm{III}}^{f-r}$
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline Number of factors & PB & fF2 III \\
+\hline $4 \leq f \leq 7$ & 8 & 8 \\
+\hline $8 \leq f \leq 11$ & 12 & 16 \\
+\hline $12 \leq f \leq 15$ & 16 & 16 \\
+\hline $16 \leq f \leq 19$ & 20 & 32 \\
+\hline $20 \leq f \leq 23$ & 24 & 32 \\
+\hline $24 \leq f \leq 27$ & 28 & 32 \\
+\hline $28 \leq f \leq 31$ & 32 & 32 \\
+\hline $32 \leq f \leq 35$ & 36 & 64 \\
+\hline$\vdots$ & $\vdots$ & $\vdots$ \\
+\hline $64 \leq f \leq 67$ & 68 & 128 \\
+\hline
+\end{tabular}
+\end{center}
+
+
+# fF2 & PB Tables Set for 4 and 5 factors
+
+Series of low $n$ Placket-Burman and fF2 (reduced factorial) Design Tables
+
+* Motivation: Develop reference of commonly used fF2 & PB Tables for typical BioProcess PD work
+* Compile Interesting Examples - for useful consideration
+
+ 
+## Comments
+
+### PB Designs
+PB designs are done in increments of 4 ... $n$ = 4, 8, 12, etc.
+
+### fF2 Designs
+fF2 designs are based on powers of 2 ($2^{(f-r)}$, where $f$=factors, $r$=reductions)  ... $n$ = 4, 8, 16, etc. 
+(or if not a power of 2 -> design must be truncated)
+
+\newpage
+
+# fF2 & PB for 4 Factors
+
+\setcounter{table}{0}
+
+## PB vs fF2 8 runs, 4 factors
+
+```{r}
+library("FrF2")
+design <- pb(8, 4)
+knitr::kable(design, align = "rrrr", caption = "PB, n=8, f=4")
+```
+
+```{r}
+library("FrF2")
+design <- FrF2(8, 4)
+knitr::kable(design, align = "rrrr", caption = "fF, n=8, f=4")
+```
+
+
+\newpage 
+
+## PB vs fF2 12/16 runs, 4 factors
+
+```{r}
+library("FrF2")
+design <- pb(12, 4)
+knitr::kable(design, align = "rrrr", caption = "PB, n=12, f=4")
+```
+
+```{r}
+library("FrF2")
+design <- FrF2(16, 4)
+knitr::kable(design, align = "rrrr", caption = "fF, n=12, f=4")
+```
+
+\newpage 
+
+# fF2 & PB for 5 Factors
+
+## PB vs fF2 8 runs, 5 factors
+
+```{r}
+library("FrF2")
+design <- pb(8, 5)
+knitr::kable(design, align = "rrrrr", caption = "PB, n=8, f=5")
+```
+
+```{r}
+library("FrF2")
+design <- FrF2(8, 5)
+knitr::kable(design, align = "rrrrr", caption = "fF, n=8, f=5")
+```
+
+\newpage 
+
+## PB vs fF2 12 runs, 5 factors
+
+```{r}
+library("FrF2")
+design <- pb(12, 5)
+knitr::kable(design, align = "rrrr", caption = "PB, n=12, f=5")
+```
+
+```{r}
+library("FrF2")
+design <- FrF2(16, 5)
+knitr::kable(design, align = "rrrr", caption = "fF, n=12, f=5")
+```
+
+\newpage 
+
+# Hadamard Matrix
+
+In mathematics, a Hadamard matrix, named after the French mathematician Jacques Hadamard, is a square matrix whose entries are either +1 or -1 and whose rows are mutually orthogonal. In geometric terms, this means that each pair of rows in a Hadamard matrix represents two perpendicular vectors, while in combinatorial terms, it means that each pair of rows has matching entries in exactly half of their columns and mismatched entries in the remaining columns. It is a consequence of this definition that the corresponding properties hold for columns as well as rows.
+
+The $n$-dimensional parallelotope spanned by the rows of an $n \times n$ Hadamard matrix has the \underline{maximum possible $n$ dimensional volume among parallelotopes} spanned by vectors whose entries are bounded in absolute value by 1. Equivalently, a Hadamard matrix has maximal determinant among matrices with entries of absolute value less than or equal to 1 and so is an extremal solution of Hadamard's maximal determinant problem.
+
+Let $H$ be a Hadamard matrix of order $n$. The transpose of $H$ is closely related to its inverse. In fact:
+$$
+H H^{\top}=n I_n
+$$
+where $I_n$ is the $n \times n$ identity matrix and $H^{\top}$ is the transpose of $H$. To see that this is true, notice that the rows of $H$ are all orthogonal vectors over the field of real numbers and each have length $\sqrt{n}$. Dividing $H$ through by this length gives an orthogonal matrix whose transpose is thus its inverse. Multiplying by the length again gives the equality above. As a result,
+$$
+\operatorname{det}(H)= \pm n^{n / 2} \text {, }
+$$
+where $\operatorname{det}(H)$ is the determinant of $H$.
+Suppose that $M$ is a complex matrix of order $n$, whose entries are bounded by $\left|M_{i j}\right| \leq 1$, for each $i, j$ between 1 and $n$. Then Hadamard's determinant bound states that
+$$
+|\operatorname{det}(M)| \leq n^{n / 2} .
+$$
+
+Equality in this bound is attained for a real matrix $M$ if and only if $M$ is a Hadamard matrix.
+The order of a Hadamard matrix must be 1,2 , or a multiple of $4^{[1]}$
+
+\newpage 
+
+## Example of Hadamard for n=8
+
+```{r}
+library(pracma)
+H <- hadamard(8)
+design <- H
+knitr::kable(design, align = "rrrrrrrr", caption = "Hadamard, n=8")
+```
+
+## Example of Hadamard for n=12
+
+```{r}
+library(pracma)
+H <- hadamard(12)
+design <- H
+knitr::kable(design, align = "rrrrrrrrrrrr", caption = "Hadamard, n=12")
+```
+
+## Calculate Hadamard Property for n=8, $H H^{\top}=n I_n$
+
+```{r}
+library(pracma)
+H <- hadamard(8)
+H_T <- t(H)
+design <- H %*% H_T
+knitr::kable(design, align = "rrrrrrrr", caption = "Hadamard, n=8")
+```
+
+\newpage 
+
+# References
+
+
