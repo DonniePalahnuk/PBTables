@@ -1,7 +1,7 @@
 # Plackett-Burman (PB) Tables Comparison with Fractional Factorial (fF2) Designs
 
 ## Overview
-This repository provides a detailed comparison between Plackett-Burman (PB) and Fractional Factorial (fF2) designs, specifically targeting experiments with a low number of factors. The primary focus is on how these two designs can help reduce the number of experiments in the Design of Experiments (DOE) methodology while providing a robust framework for statistical analysis. The content in this repository is derived from the whitepaper "fF2 vs PB Tables for Low n," authored by Donald Palahnuk.
+This repository provides a detailed comparison between Plackett-Burman (PB) and Fractional Factorial (fF2) designs, specifically targeting experiments with a low number of factors. The primary focus is on how these two designs can help reduce the number of experiments in the Design of Experiments (DOE) methodology while providing a robust framework for statistical analysis. 
 
 ## Contents
 ### Sections:
