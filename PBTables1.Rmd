@@ -113,6 +113,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.pos = 'h')
   \vhEntry{0.1}{2023.10.10}{DP}{compared fF2 vs PB calls, added kable tables}
   \vhEntry{0.2}{2023.10.11}{DP}{add resolution, and some math}
   \vhEntry{1.0}{2024.10.27}{DP}{update for github issue}
+  \vhEntry{1.0}{2024.11.10}{DP}{plan extensions - subject area application}
 \end{versionhistory}
 
 \newpage
